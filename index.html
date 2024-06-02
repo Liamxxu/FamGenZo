@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GenZo - Auszahlungsübersicht</title>
+    <title>Mitarbeiterliste</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -27,6 +27,27 @@
             text-align: center;
             color: #333;
         }
+        form {
+            margin-bottom: 20px;
+        }
+        input[type="text"], input[type="number"] {
+            width: calc(100% - 22px);
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #007BFF;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
         table {
             width: 100%;
             border-collapse: collapse;
@@ -42,77 +63,87 @@
         th {
             background-color: #f2f2f2;
         }
-        .info {
-            margin-top: 20px;
-            padding: 10px;
-            background-color: #e7f3fe;
-            border: 1px solid #b3e5fc;
-            border-radius: 5px;
-            color: #0277bd;
-        }
-        .info img {
-            vertical-align: middle;
-            margin-right: 10px;
-        }
     </style>
 </head>
 <body>
     <header>
-        <h1>GenZo - Auszahlungsübersicht</h1>
+        <h1>Mitarbeiterliste</h1>
     </header>
     <div class="container">
-        <h2>Datum: <span id="datetime"></span></h2>
+        <form id="add-employee-form">
+            <h2>Neuen Mitarbeiter hinzufügen</h2>
+            <input type="text" id="uuid" placeholder="UUID" required>
+            <input type="text" id="name" placeholder="Name" required>
+            <input type="number" id="totalPayout" placeholder="Total Payout" required>
+            <button type="submit">Hinzufügen</button>
+        </form>
         <table id="employee-table">
             <thead>
                 <tr>
+                    <th>UUID</th>
                     <th>Name</th>
-                    <th>ID</th>
-                    <th>Gesamtzahlung ($)</th>
+                    <th>Total Payout</th>
                 </tr>
             </thead>
             <tbody id="employee-list">
                 <!-- Mitarbeiter werden hier hinzugefügt -->
             </tbody>
         </table>
-        <div class="info">
-            <img src="https://img.icons8.com/fluency/48/000000/info.png" alt="Info Icon" width="24">
-            <span>Die Auszahlungen erfolgen jeden Sonntag. Alle Informationen werden manuell eingetragen und es könnte zu Verzögerungen kommen.</span>
-        </div>
     </div>
     <script>
-        document.getElementById("datetime").textContent = new Date().toLocaleString('de-DE', {
-            weekday: 'long',
-            day: '2-digit',
-            month: '2-digit',
-            year: 'numeric'
-        });
-
-        const scriptURL = 'https://script.google.com/macros/s/AKfycbyL6CIjCMpo4QiTK20NtmiNQ_TzbpmhDwHbSsO6AAs-3lq2-24oOKahMoEovUm7tzeJ/exec';
+        const scriptURL = 'https://script.google.com/macros/s/AKfycbyL6CIjCMpo4QiTK20NtmiNQ_TzbpmhDwHbSsO6AAs-3lq2-24oOKahMoEovUm7tzeJ/exec'; // Ersetze WEB_APP_URL durch die URL deines veröffentlichten Google Apps Script
 
         async function fetchEmployees() {
             try {
                 const response = await fetch(scriptURL);
                 const data = await response.json();
-                if (data.error) {
-                    console.error('Error:', data.error);
-                    return;
-                }
                 const tableBody = document.getElementById('employee-list');
                 tableBody.innerHTML = '';
                 data.forEach(employee => {
                     const row = document.createElement('tr');
                     row.innerHTML = `
+                        <td>${employee.UUID}</td>
                         <td>${employee.Name}</td>
-                        <td>${employee.ID}</td>
                         <td>${employee.TotalPayout}</td>
                     `;
                     tableBody.appendChild(row);
                 });
             } catch (error) {
-                console.error('Error fetching data:', error);
+                console.error('Error fetching employees:', error);
             }
         }
 
+        async function addEmployee(event) {
+            event.preventDefault();
+            const uuid = document.getElementById('uuid').value;
+            const name = document.getElementById('name').value;
+            const totalPayout = document.getElementById('totalPayout').value;
+
+            try {
+                const response = await fetch(scriptURL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        action: 'addEmployee',
+                        uuid,
+                        name,
+                        totalPayout
+                    })
+                });
+
+                if (response.ok) {
+                    fetchEmployees();
+                } else {
+                    console.error('Error adding employee:', response.statusText);
+                }
+            } catch (error) {
+                console.error('Error adding employee:', error);
+            }
+        }
+
+        document.getElementById('add-employee-form').addEventListener('submit', addEmployee);
         document.addEventListener('DOMContentLoaded', fetchEmployees);
     </script>
 </body>
