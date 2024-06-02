@@ -27,6 +27,27 @@
             text-align: center;
             color: #333;
         }
+        form {
+            margin-bottom: 20px;
+        }
+        input[type="text"], input[type="number"] {
+            width: calc(100% - 22px);
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #007BFF;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
         table {
             width: 100%;
             border-collapse: collapse;
@@ -49,6 +70,13 @@
         <h1>Mitarbeiterliste</h1>
     </header>
     <div class="container">
+        <form id="add-employee-form">
+            <h2>Neuen Mitarbeiter hinzufügen</h2>
+            <input type="text" id="uuid" placeholder="UUID" required>
+            <input type="text" id="name" placeholder="Name" required>
+            <input type="number" id="totalPayout" placeholder="Total Payout" required>
+            <button type="submit">Hinzufügen</button>
+        </form>
         <table id="employee-table">
             <thead>
                 <tr>
@@ -63,7 +91,7 @@
         </table>
     </div>
     <script>
-        const scriptURL = 'https://script.google.com/macros/s/AKfycbyL6CIjCMpo4QiTK20NtmiNQ_TzbpmhDwHbSsO6AAs-3lq2-24oOKahMoEovUm7tzeJ/exec'; // Ersetze WEB_APP_URL durch die URL deines veröffentlichten Google Apps Script
+        const scriptURL = 'https://script.google.com/macros/s/AKfycbyL6CIjCMpo4QiTK20NtmiNQ_TzbpmhDwHbSsO6AAs-3lq2-24oOKahMoEovUm7tzeJ/exec';
 
         async function fetchEmployees() {
             try {
@@ -85,6 +113,37 @@
             }
         }
 
+        async function addEmployee(event) {
+            event.preventDefault();
+            const uuid = document.getElementById('uuid').value;
+            const name = document.getElementById('name').value;
+            const totalPayout = document.getElementById('totalPayout').value;
+
+            try {
+                const response = await fetch(scriptURL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        action: 'addEmployee',
+                        uuid,
+                        name,
+                        totalPayout
+                    })
+                });
+
+                if (response.ok) {
+                    fetchEmployees();
+                } else {
+                    console.error('Error adding employee:', response.statusText);
+                }
+            } catch (error) {
+                console.error('Error adding employee:', error);
+            }
+        }
+
+        document.getElementById('add-employee-form').addEventListener('submit', addEmployee);
         document.addEventListener('DOMContentLoaded', fetchEmployees);
     </script>
 </body>
