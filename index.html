@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mitarbeiterliste</title>
+    <title>Majestic Family Manager</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -16,22 +16,47 @@
             padding: 10px 0;
             text-align: center;
         }
+        nav {
+            background-color: #444;
+            overflow: hidden;
+        }
+        nav a {
+            float: left;
+            display: block;
+            color: #fff;
+            text-align: center;
+            padding: 14px 20px;
+            text-decoration: none;
+        }
+        nav a:hover {
+            background-color: #ddd;
+            color: #000;
+        }
         .container {
+            display: none;
             max-width: 1200px;
             margin: 20px auto;
             padding: 20px;
             background-color: #fff;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         }
-        h1 {
+        .container.active {
+            display: block;
+        }
+        h1, h2 {
             text-align: center;
             color: #333;
         }
-        form {
+        .form-group {
             margin-bottom: 20px;
         }
-        input[type="text"], input[type="number"] {
-            width: calc(100% - 22px);
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input[type="text"], input[type="number"], textarea, select {
+            width: 100%;
             padding: 10px;
             margin-bottom: 10px;
             border: 1px solid #ddd;
@@ -67,84 +92,79 @@
 </head>
 <body>
     <header>
-        <h1>Mitarbeiterliste</h1>
+        <h1>Majestic Family Manager</h1>
     </header>
-    <div class="container">
-        <form id="add-employee-form">
-            <h2>Neuen Mitarbeiter hinzufügen</h2>
-            <input type="text" id="uuid" placeholder="UUID" required>
-            <input type="text" id="name" placeholder="Name" required>
-            <input type="number" id="totalPayout" placeholder="Total Payout" required>
-            <button type="submit">Hinzufügen</button>
+    <nav>
+        <a href="#" onclick="showSection('auftraege')">Aufträge</a>
+        <a href="#" onclick="showSection('familie')">Familie</a>
+    </nav>
+    <div class="container" id="auftraege">
+        <h2>Aufträge</h2>
+        <form id="auftrag-form">
+            <div class="form-group">
+                <label for="auftrag">Auftrag:</label>
+                <input type="text" id="auftrag" required>
+            </div>
+            <div class="form-group">
+                <label for="gewinn">Gewinn ($):</label>
+                <input type="number" id="gewinn" required>
+            </div>
+            <div class="form-group">
+                <label for="kosten">Kosten ($):</label>
+                <input type="number" id="kosten" required>
+            </div>
+            <div class="form-group">
+                <label for="mitarbeiter-anzahl">Anzahl der Mitarbeiter:</label>
+                <input type="number" id="mitarbeiter-anzahl" required>
+            </div>
+            <div class="form-group">
+                <label for="mitarbeiter">Mitarbeiter:</label>
+                <select id="mitarbeiter" multiple required></select>
+            </div>
+            <button type="button" onclick="addAuftrag()">Auftrag hinzufügen</button>
         </form>
-        <table id="employee-table">
+        <h2>Auftragsliste</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Auftrag</th>
+                    <th>Gewinn ($)</th>
+                    <th>Kosten ($)</th>
+                    <th>Mitarbeiter</th>
+                    <th>Auszahlung pro Mitarbeiter ($)</th>
+                </tr>
+            </thead>
+            <tbody id="auftragsliste"></tbody>
+        </table>
+    </div>
+    <div class="container" id="familie">
+        <h2>Familiengewinn</h2>
+        <p id="familien-gewinn">Gesamtgewinn der Familie: $0.00</p>
+        <h2>Neuen Mitarbeiter hinzufügen</h2>
+        <form id="familie-form">
+            <div class="form-group">
+                <label for="uuid">UUID:</label>
+                <input type="text" id="familie-uuid" required>
+            </div>
+            <div class="form-group">
+                <label for="name">Name:</label>
+                <input type="text" id="familie-name" required>
+            </div>
+            <button type="button" onclick="addMitarbeiterFromFamilie()">Mitarbeiter hinzufügen</button>
+        </form>
+        <h2>Mitarbeiterliste</h2>
+        <table>
             <thead>
                 <tr>
                     <th>UUID</th>
                     <th>Name</th>
-                    <th>Total Payout</th>
+                    <th>Gesamte Auszahlung ($)</th>
+                    <th>Aktionen</th>
                 </tr>
             </thead>
-            <tbody id="employee-list">
-                <!-- Mitarbeiter werden hier hinzugefügt -->
-            </tbody>
+            <tbody id="familie-mitarbeiterliste"></tbody>
         </table>
     </div>
-    <script>
-        const scriptURL = 'https://script.google.com/macros/s/AKfycbyL6CIjCMpo4QiTK20NtmiNQ_TzbpmhDwHbSsO6AAs-3lq2-24oOKahMoEovUm7tzeJ/exec';
-
-        async function fetchEmployees() {
-            try {
-                const response = await fetch(scriptURL);
-                const data = await response.json();
-                const tableBody = document.getElementById('employee-list');
-                tableBody.innerHTML = '';
-                data.forEach(employee => {
-                    const row = document.createElement('tr');
-                    row.innerHTML = `
-                        <td>${employee.UUID}</td>
-                        <td>${employee.Name}</td>
-                        <td>${employee.TotalPayout}</td>
-                    `;
-                    tableBody.appendChild(row);
-                });
-            } catch (error) {
-                console.error('Error fetching employees:', error);
-            }
-        }
-
-        async function addEmployee(event) {
-            event.preventDefault();
-            const uuid = document.getElementById('uuid').value;
-            const name = document.getElementById('name').value;
-            const totalPayout = document.getElementById('totalPayout').value;
-
-            try {
-                const response = await fetch(scriptURL, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        action: 'addEmployee',
-                        uuid,
-                        name,
-                        totalPayout
-                    })
-                });
-
-                if (response.ok) {
-                    fetchEmployees();
-                } else {
-                    console.error('Error adding employee:', response.statusText);
-                }
-            } catch (error) {
-                console.error('Error adding employee:', error);
-            }
-        }
-
-        document.getElementById('add-employee-form').addEventListener('submit', addEmployee);
-        document.addEventListener('DOMContentLoaded', fetchEmployees);
-    </script>
+    <script src="scripts.js"></script>
 </body>
 </html>
