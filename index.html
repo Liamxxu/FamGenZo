@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mitarbeiterliste</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background-color: #f4f4f4;
+        }
+        header {
+            background-color: #333;
+            color: #fff;
+            padding: 10px 0;
+            text-align: center;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Mitarbeiterliste</h1>
+    </header>
+    <div class="container">
+        <table id="employee-table">
+            <thead>
+                <tr>
+                    <th>UUID</th>
+                    <th>Name</th>
+                    <th>Total Payout</th>
+                </tr>
+            </thead>
+            <tbody id="employee-list">
+                <!-- Mitarbeiter werden hier hinzugefügt -->
+            </tbody>
+        </table>
+    </div>
+    <script>
+        const scriptURL = 'https://script.google.com/macros/s/AKfycbyL6CIjCMpo4QiTK20NtmiNQ_TzbpmhDwHbSsO6AAs-3lq2-24oOKahMoEovUm7tzeJ/exec'; // Ersetze WEB_APP_URL durch die URL deines veröffentlichten Google Apps Script
+
+        async function fetchEmployees() {
+            try {
+                const response = await fetch(scriptURL);
+                const data = await response.json();
+                const tableBody = document.getElementById('employee-list');
+                tableBody.innerHTML = '';
+                data.forEach(employee => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${employee.UUID}</td>
+                        <td>${employee.Name}</td>
+                        <td>${employee.TotalPayout}</td>
+                    `;
+                    tableBody.appendChild(row);
+                });
+            } catch (error) {
+                console.error('Error fetching employees:', error);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', fetchEmployees);
+    </script>
+</body>
+</html>
