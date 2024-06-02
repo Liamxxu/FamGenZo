@@ -3,168 +3,115 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Majestic Family Manager</title>
+    <title>GenZo - Auszahlungsübersicht</title>
     <style>
         body {
             font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
             margin: 0;
-            background-color: #f4f4f4;
-        }
-        header {
-            background-color: #333;
-            color: #fff;
-            padding: 10px 0;
-            text-align: center;
-        }
-        nav {
-            background-color: #444;
-            overflow: hidden;
-        }
-        nav a {
-            float: left;
-            display: block;
-            color: #fff;
-            text-align: center;
-            padding: 14px 20px;
-            text-decoration: none;
-        }
-        nav a:hover {
-            background-color: #ddd;
-            color: #000;
+            padding: 20px;
         }
         .container {
-            display: none;
-            max-width: 1200px;
-            margin: 20px auto;
-            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
             background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         }
-        .container.active {
-            display: block;
+        .logo {
+            text-align: center;
+            margin-bottom: 20px;
         }
         h1, h2 {
             text-align: center;
             color: #333;
         }
-        .form-group {
-            margin-bottom: 20px;
-        }
-        label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
-        }
-        input[type="text"], input[type="number"], textarea, select {
-            width: 100%;
-            padding: 10px;
-            margin-bottom: 10px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-        }
-        button {
-            padding: 10px 20px;
-            background-color: #007BFF;
-            color: #fff;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        button:hover {
-            background-color: #0056b3;
-        }
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-bottom: 20px;
-        }
-        table, th, td {
-            border: 1px solid #ddd;
+            margin-top: 20px;
         }
         th, td {
-            padding: 10px;
+            border: 1px solid #ddd;
+            padding: 8px;
             text-align: left;
         }
         th {
             background-color: #f2f2f2;
+            color: #333;
+        }
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        .info {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #e7f3fe;
+            border: 1px solid #b3e5fc;
+            border-radius: 5px;
+            color: #0277bd;
+        }
+        .info img {
+            vertical-align: middle;
+            margin-right: 10px;
         }
     </style>
 </head>
 <body>
-    <header>
-        <h1>Majestic Family Manager</h1>
-    </header>
-    <nav>
-        <a href="#" onclick="showSection('auftraege')">Aufträge</a>
-        <a href="#" onclick="showSection('familie')">Familie</a>
-    </nav>
-    <div class="container" id="auftraege">
-        <h2>Aufträge</h2>
-        <form id="auftrag-form">
-            <div class="form-group">
-                <label for="auftrag">Auftrag:</label>
-                <input type="text" id="auftrag" required>
-            </div>
-            <div class="form-group">
-                <label for="gewinn">Gewinn ($):</label>
-                <input type="number" id="gewinn" required>
-            </div>
-            <div class="form-group">
-                <label for="kosten">Kosten ($):</label>
-                <input type="number" id="kosten" required>
-            </div>
-            <div class="form-group">
-                <label for="mitarbeiter-anzahl">Anzahl der Mitarbeiter:</label>
-                <input type="number" id="mitarbeiter-anzahl" required>
-            </div>
-            <div class="form-group">
-                <label for="mitarbeiter">Mitarbeiter:</label>
-                <select id="mitarbeiter" multiple required></select>
-            </div>
-            <button type="button" onclick="addAuftrag()">Auftrag hinzufügen</button>
-        </form>
-        <h2>Auftragsliste</h2>
-        <table>
+    <div class="container">
+        <div class="logo">
+            <img src="https://i.ibb.co/FJ96gg5/genzo-logo.jpg" alt="GenZo Logo" width="200">
+        </div>
+        <h1>GenZo - Auszahlungsübersicht</h1>
+        <h2>Datum: <span id="datetime"></span></h2>
+        <table id="data-table">
             <thead>
                 <tr>
-                    <th>Auftrag</th>
-                    <th>Gewinn ($)</th>
-                    <th>Kosten ($)</th>
-                    <th>Mitarbeiter</th>
-                    <th>Auszahlung pro Mitarbeiter ($)</th>
-                </tr>
-            </thead>
-            <tbody id="auftragsliste"></tbody>
-        </table>
-    </div>
-    <div class="container" id="familie">
-        <h2>Familiengewinn</h2>
-        <p id="familien-gewinn">Gesamtgewinn der Familie: $0.00</p>
-        <h2>Neuen Mitarbeiter hinzufügen</h2>
-        <form id="familie-form">
-            <div class="form-group">
-                <label for="uuid">UUID:</label>
-                <input type="text" id="familie-uuid" required>
-            </div>
-            <div class="form-group">
-                <label for="name">Name:</label>
-                <input type="text" id="familie-name" required>
-            </div>
-            <button type="button" onclick="addMitarbeiterFromFamilie()">Mitarbeiter hinzufügen</button>
-        </form>
-        <h2>Mitarbeiterliste</h2>
-        <table>
-            <thead>
-                <tr>
-                    <th>UUID</th>
                     <th>Name</th>
-                    <th>Gesamte Auszahlung ($)</th>
-                    <th>Aktionen</th>
+                    <th>ID</th>
+                    <th>Gesamtzahlung ($)</th>
                 </tr>
             </thead>
-            <tbody id="familie-mitarbeiterliste"></tbody>
+            <tbody>
+                <!-- Daten werden hier dynamisch eingefügt -->
+            </tbody>
         </table>
+        <div class="info">
+            <img src="https://img.icons8.com/fluency/48/000000/info.png" alt="Info Icon" width="24">
+            <span>Die Auszahlungen erfolgen jeden Sonntag. Alle Informationen werden manuell eingetragen und es könnte zu Verzögerungen kommen.</span>
+        </div>
     </div>
-    <script src="scripts.js"></script>
+    <script>
+        document.getElementById("datetime").textContent = new Date().toLocaleString('de-DE', {
+            weekday: 'long',
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric'
+        });
+
+        function fetchData() {
+            fetch('https://script.google.com/macros/s/AKfycbyL6CIjCMpo4QiTK20NtmiNQ_TzbpmhDwHbSsO6AAs-3lq2-24oOKahMoEovUm7tzeJ/exec')
+                .then(response => response.json())
+                .then(data => populateTable(data))
+                .catch(error => console.error('Error fetching data:', error));
+        }
+
+        function populateTable(data) {
+            const tableBody = document.querySelector('#data-table tbody');
+            tableBody.innerHTML = '';  // Clear existing data
+            data.forEach(row => {
+                const tr = document.createElement('tr');
+                row.forEach(cell => {
+                    const td = document.createElement('td');
+                    td.textContent = cell;
+                    tr.appendChild(td);
+                });
+                tableBody.appendChild(tr);
+            });
+        }
+
+        window.onload = fetchData;
+    </script>
 </body>
 </html>
