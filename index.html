@@ -52,6 +52,9 @@
             background-color: #7f8c8d;
             color: #ecf0f1;
         }
+        tr:hover {
+            background-color: #95a5a6;
+        }
         .info {
             margin-top: 20px;
             padding: 10px;
@@ -69,6 +72,24 @@
             font-size: 1.5em;
             margin-bottom: 20px;
         }
+        .loading {
+            text-align: center;
+            font-size: 1.2em;
+            margin-top: 20px;
+        }
+        .error {
+            color: #e74c3c;
+            text-align: center;
+            margin-top: 20px;
+        }
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            th, td {
+                padding: 5px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -83,7 +104,9 @@
         <div class="total-payout">
             Gesamtauszahlung: $<span id="total-payout">0</span>
         </div>
-        <table id="employee-table">
+        <div id="loading" class="loading">Daten werden geladen...</div>
+        <div id="error" class="error" style="display: none;">Fehler beim Laden der Daten. Bitte versuchen Sie es später erneut.</div>
+        <table id="employee-table" style="display: none;">
             <thead>
                 <tr>
                     <th>UUID</th>
@@ -114,6 +137,9 @@
             try {
                 const response = await fetch(scriptURL);
                 const data = await response.json();
+                if (data.error) {
+                    throw new Error(data.error);
+                }
                 const tableBody = document.getElementById('employee-list');
                 const totalPayoutElement = document.getElementById('total-payout');
                 let totalPayout = 0;
@@ -129,8 +155,12 @@
                     totalPayout += parseFloat(employee.TotalPayout);
                 });
                 totalPayoutElement.textContent = totalPayout.toFixed(2);
+                document.getElementById('employee-table').style.display = 'table';
+                document.getElementById('loading').style.display = 'none';
             } catch (error) {
                 console.error('Error fetching employees:', error);
+                document.getElementById('error').style.display = 'block';
+                document.getElementById('loading').style.display = 'none';
             }
         }
 
